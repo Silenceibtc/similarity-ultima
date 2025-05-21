@@ -5,9 +5,7 @@ import cn.edu.dlmu.backend.constant.UserConstant;
 import cn.edu.dlmu.backend.exception.BusinessException;
 import cn.edu.dlmu.backend.mapper.TeamMapper;
 import cn.edu.dlmu.backend.mapper.UserMapper;
-import cn.edu.dlmu.backend.model.domain.Team;
-import cn.edu.dlmu.backend.model.domain.User;
-import cn.edu.dlmu.backend.model.domain.UserTeam;
+import cn.edu.dlmu.backend.model.domain.*;
 import cn.edu.dlmu.backend.model.dto.TeamDTO;
 import cn.edu.dlmu.backend.model.enums.TeamStatusEnum;
 import cn.edu.dlmu.backend.model.request.JoinTeamRequest;
@@ -15,6 +13,8 @@ import cn.edu.dlmu.backend.model.request.QuitTeamRequest;
 import cn.edu.dlmu.backend.model.request.UpdateTeamRequest;
 import cn.edu.dlmu.backend.model.vo.TeamWithUserListVO;
 import cn.edu.dlmu.backend.model.vo.UserWithTeamIdVO;
+import cn.edu.dlmu.backend.service.GroupChatService;
+import cn.edu.dlmu.backend.service.GroupMemberService;
 import cn.edu.dlmu.backend.service.TeamService;
 import cn.edu.dlmu.backend.service.UserTeamService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -38,6 +38,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private GroupChatService groupChatService;
+
+    @Resource
+    private GroupMemberService groupMemberService;
 
     @Override
     @Transactional
@@ -101,6 +107,29 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if (!save) {
             throw new BusinessException(ErrorCode.DB_ERROR, "创建队伍失败");
         }
+
+        // 10.创建队伍对应的群聊
+        GroupChat groupChat = new GroupChat();
+        groupChat.setTeamId(teamId);
+        groupChat.setGroupName(team.getTeamName() + "交流群");
+        groupChat.setGroupDesc("队伍" + team.getTeamName() + "的官方群聊");
+        groupChat.setCreatorId(userId);
+        boolean groupSave = groupChatService.save(groupChat);
+        if (!groupSave) {
+            throw new BusinessException(ErrorCode.DB_ERROR, "创建群聊失败");
+        }
+
+        // 11.将创建者设为群管理员
+        GroupMember groupMember = new GroupMember();
+        groupMember.setGroupId(groupChat.getId());
+        groupMember.setUserId(userId);
+        groupMember.setJoinTime(new Date());
+        groupMember.setIsAdmin(1); // 1-管理员
+        boolean memberSave = groupMemberService.save(groupMember);
+        if (!memberSave) {
+            throw new BusinessException(ErrorCode.DB_ERROR, "添加群成员失败");
+        }
+
         return teamId;
     }
 
@@ -337,7 +366,29 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if (!save) {
                 throw new BusinessException(ErrorCode.DB_ERROR, "新增用户-队伍关联信息失败");
             }
-            return true;
+
+            // 10.加入队伍对应的群聊
+            // 查询队伍对应的群聊（通过group_chat表的teamId关联）
+            QueryWrapper<GroupChat> groupQuery = new QueryWrapper<>();
+            groupQuery.eq("teamId", teamId);
+            GroupChat groupChat = groupChatService.getOne(groupQuery);
+            if (groupChat == null) {
+                throw new BusinessException(ErrorCode.NULL_ERROR, "群聊不存在");
+            }
+            // 检查是否已加入群聊
+            QueryWrapper<GroupMember> memberQuery = new QueryWrapper<>();
+            memberQuery.eq("groupId", groupChat.getId())
+                    .eq("userId", currentUser.getId());
+            if (groupMemberService.count(memberQuery) > 0) {
+                return true; // 已加入，无需重复操作
+            }
+            // 插入群成员记录（普通成员）
+            GroupMember groupMember = new GroupMember();
+            groupMember.setGroupId(groupChat.getId());
+            groupMember.setUserId(currentUser.getId());
+            groupMember.setJoinTime(new Date());
+            groupMember.setIsAdmin(0); // 0-普通成员
+            return groupMemberService.save(groupMember);
         }
     }
 

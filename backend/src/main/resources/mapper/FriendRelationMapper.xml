@@ -19,4 +19,10 @@
         isAgreed,createTime,updateTime,
         isDelete
     </sql>
+
+    <select id="selectFriendIdsByUserId" resultType="java.lang.Long">
+        SELECT friendId FROM friend_relation
+        WHERE userId = #{userId} AND isAgreed = 1 AND isDelete = 0
+    </select>
+
 </mapper>
