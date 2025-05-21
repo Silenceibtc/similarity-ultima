@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.dlmu.backend.mapper.ChatMessageMapper">
+
+    <resultMap id="BaseResultMap" type="cn.edu.dlmu.backend.model.domain.ChatMessage">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="chatType" column="chatType" jdbcType="TINYINT"/>
+            <result property="senderId" column="senderId" jdbcType="BIGINT"/>
+            <result property="receiverId" column="receiverId" jdbcType="BIGINT"/>
+            <result property="content" column="content" jdbcType="VARCHAR"/>
+            <result property="messageType" column="messageType" jdbcType="TINYINT"/>
+            <result property="sendTime" column="sendTime" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,chatType,senderId,
+        receiverId,content,messageType,
+        sendTime,isDelete
+    </sql>
+</mapper>

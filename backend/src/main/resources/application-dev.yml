@@ -1,0 +1,16 @@
+similarity:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: Mysql.86219
+    url: jdbc:mysql://localhost:3306/similarity
+  redis:
+    port: 6379
+    database: 0
+    host: localhost
+    password: 12345678
+  qiniu:
+    accessKey: XgQ9GLQY8BVV-780-jRQFN9NZHIliM3d12DSnjmh
+    secretKey: W9cHSbWJPVLfp_AhuDvcluWI5vM4bAtGB7Gr9KT8
+    bucketName: silenceibtc-pic
+    domain: https://pic.sibtc.top
