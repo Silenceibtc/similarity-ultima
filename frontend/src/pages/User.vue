@@ -209,7 +209,6 @@ const logout = async () => {
             title="我的好友"
             is-link
             to="/friend/list"
-            :value="currentUser.friendCount || 0"
         />
       </van-cell-group>
     </div>

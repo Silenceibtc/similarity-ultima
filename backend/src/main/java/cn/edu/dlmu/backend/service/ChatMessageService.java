@@ -1,6 +1,7 @@
 package cn.edu.dlmu.backend.service;
 
 import cn.edu.dlmu.backend.model.domain.ChatMessage;
+import cn.edu.dlmu.backend.model.vo.ChatMessageVO;
 import cn.edu.dlmu.backend.model.vo.ChatSessionVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
@@ -24,4 +25,12 @@ public interface ChatMessageService extends IService<ChatMessage> {
      * @return 会话列表
      */
     List<ChatSessionVO> getChatSessions(Long userId);
+
+    /**
+     * 获取聊天记录
+     * @param userId 当前用户ID
+     * @param targetId 聊天对象ID（单聊为好友ID，群聊为群ID）
+     * @param chatType 聊天类型（0-单聊，1-群聊）
+     */
+    List<ChatMessageVO> getChatMessages(Long userId, Long targetId, Integer chatType);
 }

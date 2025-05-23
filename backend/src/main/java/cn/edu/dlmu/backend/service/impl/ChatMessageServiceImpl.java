@@ -5,17 +5,13 @@ import cn.edu.dlmu.backend.exception.BusinessException;
 import cn.edu.dlmu.backend.mapper.ChatMessageMapper;
 import cn.edu.dlmu.backend.mapper.GroupChatMapper;
 import cn.edu.dlmu.backend.mapper.GroupMemberMapper;
-import cn.edu.dlmu.backend.model.domain.ChatMessage;
-import cn.edu.dlmu.backend.model.domain.FriendRelation;
-import cn.edu.dlmu.backend.model.domain.GroupChat;
-import cn.edu.dlmu.backend.model.domain.GroupMember;
+import cn.edu.dlmu.backend.model.domain.*;
+import cn.edu.dlmu.backend.model.vo.ChatMessageVO;
 import cn.edu.dlmu.backend.model.vo.ChatSessionVO;
-import cn.edu.dlmu.backend.service.ChatMessageService;
-import cn.edu.dlmu.backend.service.FriendRelationService;
-import cn.edu.dlmu.backend.service.GroupChatService;
-import cn.edu.dlmu.backend.service.GroupMemberService;
+import cn.edu.dlmu.backend.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -35,6 +31,12 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
 
     @Resource
     private GroupMemberService groupMemberService;
+
+    @Resource
+    private UserService userService;
+
+    @Resource
+    private ChatMessageMapper chatMessageMapper;
 
     @Override
     public boolean sendMessage(Integer chatType, Long senderId, Long receiverId, String content, Integer messageType) {
@@ -124,5 +126,41 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         allSessions.addAll(groupChats);
         allSessions.sort((a, b) -> b.getLastMessageTime().compareTo(a.getLastMessageTime()));
         return allSessions;
+    }
+
+    @Override
+    public List<ChatMessageVO> getChatMessages(Long userId, Long targetId, Integer chatType) {
+        List<ChatMessage> messages = chatMessageMapper.selectList(
+                new QueryWrapper<ChatMessage>()
+                        .eq("chatType", chatType)
+                        .and(wrapper -> { // 使用 Consumer<Wrapper> 直接修改条件
+                            if (chatType == 0) { // 单聊场景：查询双方互发的消息
+                                wrapper.and(q ->
+                                        q.eq("senderId", userId).eq("receiverId", targetId) // 当前用户发给对方
+                                                .or() // 或者
+                                                .eq("senderId", targetId).eq("receiverId", userId) // 对方发给当前用户
+                                );
+                            } else { // 群聊场景：receiverId 是群 ID，直接匹配
+                                wrapper.eq("receiverId", targetId);
+                            }
+                        })
+                        .orderByAsc("sendTime") // 按时间排序
+        );
+
+        // 转换为VO，补充头像信息
+        return messages.stream().map(msg -> {
+            ChatMessageVO vo = new ChatMessageVO();
+            BeanUtils.copyProperties(msg, vo);
+
+            // 获取发送者头像（单聊从用户表获取，群聊从群成员表或群表获取）
+            if (chatType == 0) { // 单聊
+                User sender = userService.getById(msg.getSenderId());
+                vo.setSenderAvatar(sender.getAvatarUrl());
+            } else { // 群聊（假设群聊发送者是群成员，头像从用户表获取）
+                User sender = userService.getById(msg.getSenderId());
+                vo.setSenderAvatar(sender.getAvatarUrl());
+            }
+            return vo;
+        }).collect(Collectors.toList());
     }
 }

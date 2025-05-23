@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // BasicLayout.vue
-import { useRouter } from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import { computed } from 'vue';
 
 const router = useRouter();
+const route = useRoute()
 
 // 定义带默认值的 props
 const props = defineProps({
@@ -14,7 +15,12 @@ const props = defineProps({
 });
 
 // 安全访问计算属性
-const navTitle = computed(() => props.meta.navTitle || 'Similarity');
+// 修改 navTitle 计算逻辑，处理函数类型
+const navTitle = computed(() => {
+  const title = props.meta.navTitle;
+  // 如果是函数，传入当前路由对象执行
+  return typeof title === 'function' ? title(route) : title || 'Similarity';
+});
 const showBack = computed(() => props.meta.showBack ?? true);
 const showSearch = computed(() => props.meta.showSearch ?? false);
 

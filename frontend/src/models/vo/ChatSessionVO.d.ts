@@ -1,4 +1,4 @@
-export type chatSessionVO = {
+export type ChatSessionVO = {
     /**
      * 会话ID（单聊为好友ID，群聊为群ID）
      */

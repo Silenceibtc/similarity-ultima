@@ -25,8 +25,8 @@ const getFriendList = async () => {
 onMounted(getFriendList);
 
 // 跳转聊天页
-const goChat = (friendId: number) => {
-  router.push({ path: `/chat`, query: { targetId: friendId, chatType: 0 } });
+const goChat = (friendId: number, username: string) => {
+  router.push({ path: `/chat`, query: { targetId: friendId, chatType: 0, name: username } });
 };
 </script>
 
@@ -40,7 +40,7 @@ const goChat = (friendId: number) => {
           :thumb="friend.avatarUrl"
       >
         <template #footer>
-          <van-button size="mini" type="primary" @click="goChat(friend.id)">
+          <van-button size="mini" type="primary" @click="goChat(friend.id, friend.username)">
             私信
           </van-button>
         </template>

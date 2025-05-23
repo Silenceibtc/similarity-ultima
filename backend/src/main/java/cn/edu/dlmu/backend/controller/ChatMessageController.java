@@ -1,6 +1,7 @@
 package cn.edu.dlmu.backend.controller;
 
 import cn.edu.dlmu.backend.common.BaseResponse;
+import cn.edu.dlmu.backend.model.vo.ChatMessageVO;
 import cn.edu.dlmu.backend.utils.ResultUtils;
 import cn.edu.dlmu.backend.model.request.MessageSendRequest;
 import cn.edu.dlmu.backend.model.vo.ChatSessionVO;
@@ -41,4 +42,16 @@ public class ChatMessageController {
         List<ChatSessionVO> sessions = chatMessageService.getChatSessions(userId);
         return ResultUtils.success(sessions);
     }
+
+    @GetMapping("/message/list")
+    public BaseResponse<List<ChatMessageVO>> getChatMessages(
+            @RequestParam("targetId") Long targetId,
+            @RequestParam("chatType") Integer chatType,
+            HttpServletRequest request
+    ) {
+        Long userId = userService.getCurrentUserInfo(request).getId();
+        List<ChatMessageVO> messages = chatMessageService.getChatMessages(userId, targetId, chatType);
+        return ResultUtils.success(messages);
+    }
+
 }

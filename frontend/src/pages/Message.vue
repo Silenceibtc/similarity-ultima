@@ -3,8 +3,8 @@
 import { useRouter } from "vue-router";
 import myAxios from "../plugins/myAxios.ts";
 import { showFailToast } from "vant";
-import { ChatSessionVO } from "../models/vo/ChatSessionVO";
-import {onMounted, ref} from "vue"; // 假设已定义ChatSessionVO
+import {onMounted, ref} from "vue";
+import {ChatSessionVO} from "../models/vo/ChatSessionVO"; // 假设已定义ChatSessionVO
 
 const router = useRouter();
 const sessionList = ref<ChatSessionVO[]>([]);
@@ -48,7 +48,7 @@ const goChat = (session: ChatSessionVO) => {
           :label="session.lastMessage"
       >
         <template #icon>
-          <van-image :src="session.avatarUrl" round size="40" />
+          <van-image :src="session.avatarUrl" round width="40px" height="40px" />
         </template>
         <template #right-icon>
           <div style="font-size: 12px; color: #999;">
