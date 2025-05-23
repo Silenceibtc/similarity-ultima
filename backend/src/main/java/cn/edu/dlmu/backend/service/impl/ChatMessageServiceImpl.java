@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -103,10 +104,14 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                 .map(member -> {
                     GroupChat group = groupChatService.getById(member.getGroupId());
                     ChatSessionVO vo = new ChatSessionVO();
+                    User user = new User();
+                    if (member.getIsAdmin() == 1) {
+                        user = userService.getById(member.getUserId());
+                    }
                     vo.setSessionId(group.getId());
                     vo.setSessionType(1); // 群聊
                     vo.setName(group.getGroupName());
-                    vo.setAvatarUrl(null); // 群头像可单独设计字段
+                    vo.setAvatarUrl(user.getAvatarUrl()); // 群头像可单独设计字段
                     // 查询最后一条消息（示例）
                     QueryWrapper<ChatMessage> queryWrapper = new QueryWrapper<>();
                     queryWrapper.eq("chatType", 1)
@@ -124,7 +129,10 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         List<ChatSessionVO> allSessions = new ArrayList<>();
         allSessions.addAll(singleChats);
         allSessions.addAll(groupChats);
-        allSessions.sort((a, b) -> b.getLastMessageTime().compareTo(a.getLastMessageTime()));
+        // 合并单聊和群聊会话，按最后消息时间排序（处理null值）
+        allSessions.sort(Comparator
+                .comparing(ChatSessionVO::getLastMessageTime, Comparator.nullsLast(Date::compareTo)) // null值排在最后
+                .reversed()); // 反转顺序，使最近的会话在最前面
         return allSessions;
     }
 
