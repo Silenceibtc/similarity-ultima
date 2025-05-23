@@ -41,6 +41,7 @@ const handleSearch = () => router.push('/search');
   <van-tabbar route v-if="meta.layout === 'basic'">
     <van-tabbar-item icon="home-o" name="index" to="/">主页</van-tabbar-item>
     <van-tabbar-item icon="friends-o" name="team" to="/team">队伍</van-tabbar-item>
+    <van-tabbar-item icon="chat-o" name="message" to="/message">消息</van-tabbar-item>
     <van-tabbar-item icon="user-o" name="user" to="/user">个人</van-tabbar-item>
   </van-tabbar>
 </template>

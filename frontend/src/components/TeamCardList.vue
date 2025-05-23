@@ -16,6 +16,15 @@ const props = withDefaults(defineProps<UserCardListProps>(), {
   teamList: () => []
 });
 
+// 加入群聊逻辑
+const joinGroupChat = async (teamId: number) => {
+  try {
+    await myAxios.post("/group/join", { teamId });
+  } catch (error) {
+    console.error("自动加入群聊失败", error);
+  }
+};
+
 // 获取队长头像的函数
 const getLeaderAvatar = (team: TeamType) => {
   const leader = team.userVOList?.find(user => user.id === team.leaderId);
@@ -24,18 +33,21 @@ const getLeaderAvatar = (team: TeamType) => {
 const joinTeamInfo = ref<TeamType | null>(null);
 const teamPassword = ref<string>('');
 const show = ref(false);
+// 修改加入队伍方法
 const joinTeam = async (teamId: number) => {
-  const res: BaseResponse = await myAxios.post('/team/join', {
+  const res = await myAxios.post("/team/join", {
     teamId: teamId,
-    teamPassword: teamPassword.value,
-  })
+    teamPassword: teamPassword.value
+  });
   if (res.code === 0) {
-    showSuccessToast('加入成功！')
-    emit('updateTeam')
+    // 加入队伍成功后自动加入群聊
+    await joinGroupChat(teamId);
+    showSuccessToast("加入成功！");
+    emit("updateTeam");
   } else {
-    showFailToast('加入失败' + `,${res.description}`)
+    showFailToast("加入失败: " + res.description);
   }
-}
+};
 
 const deleteTeam = async (teamId: number) => {
   const res: BaseResponse = await myAxios.post('/team/delete', {

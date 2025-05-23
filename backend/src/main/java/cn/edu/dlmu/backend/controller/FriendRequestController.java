@@ -1,6 +1,7 @@
 package cn.edu.dlmu.backend.controller;
 
 import cn.edu.dlmu.backend.common.BaseResponse;
+import cn.edu.dlmu.backend.model.request.FriendRequestSendRequest;
 import cn.edu.dlmu.backend.utils.ResultUtils;
 import cn.edu.dlmu.backend.model.domain.FriendRequest;
 import cn.edu.dlmu.backend.model.request.FriendRequestOperateRequest;
@@ -23,12 +24,9 @@ public class FriendRequestController {
     private UserService userService;
 
     @PostMapping("/send")
-    public BaseResponse<Boolean> sendFriendRequest(
-            @RequestParam Long receiverId,
-            @RequestParam(required = false) String remark,
-            HttpServletRequest request) {
-        Long senderId = userService.getCurrentUserInfo(request).getId();
-        boolean result = friendRequestService.sendFriendRequest(senderId, receiverId, remark);
+    public BaseResponse<Boolean> sendFriendRequest(@RequestBody FriendRequestSendRequest request, HttpServletRequest httpRequest) {
+        Long senderId = userService.getCurrentUserInfo(httpRequest).getId();
+        boolean result = friendRequestService.sendFriendRequest(senderId, request.getReceiverId(), request.getRemark());
         return ResultUtils.success(result);
     }
 
@@ -41,9 +39,9 @@ public class FriendRequestController {
 
     @PostMapping("/handle")
     public BaseResponse<Boolean> handleFriendRequest(
-            @RequestBody FriendRequestOperateRequest request,
-            HttpServletRequest request1) {
-        boolean result = friendRequestService.handleFriendRequest(request);
+            @RequestBody FriendRequestOperateRequest friendRequestOperateRequest,
+            HttpServletRequest request) {
+        boolean result = friendRequestService.handleFriendRequest(friendRequestOperateRequest);
         return ResultUtils.success(result);
     }
 }

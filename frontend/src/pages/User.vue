@@ -201,6 +201,17 @@ const logout = async () => {
         <van-cell title="我创建的队伍" is-link to="/user/teamCreate"/>
         <van-cell title="我加入的队伍" is-link to="/user/teamJoin"/>
       </van-cell-group>
+
+      <!-- 新增我的好友入口 -->
+      <h3 class="section-title" style="margin-top: 24px;">社交</h3>
+      <van-cell-group inset>
+        <van-cell
+            title="我的好友"
+            is-link
+            to="/friend/list"
+            :value="currentUser.friendCount || 0"
+        />
+      </van-cell-group>
     </div>
 
 

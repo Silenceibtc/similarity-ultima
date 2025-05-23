@@ -17,13 +17,24 @@ const createTeamParam = ref({...initParam})
 // 添加密码可见状态
 const isPasswordVisible = ref(false);
 const router = useRouter();
+// 新增创建群聊逻辑
+const createGroupChat = async (teamId: number) => {
+  try {
+    await myAxios.post("/group/create", { teamId });
+  } catch (error) {
+    console.error("自动创建群聊失败", error);
+  }
+};
+
 const onSubmit = async () => {
-  const res:BaseResponse = await myAxios.post("/team/create", createTeamParam.value);
-  if (res.code === 0 && res.data > 0) {
-    showSuccessToast('创建队伍成功');
-    router.replace('/team');
+  const res = await myAxios.post("/team/create", createTeamParam.value);
+  if (res.code === 0) {
+    // 队伍创建成功后自动创建群聊
+    await createGroupChat(res.data); // res.data为队伍ID
+    showSuccessToast("队伍创建成功");
+    router.push("/user/teamCreate");
   } else {
-    showFailToast('创建队伍失败')
+    showFailToast(res.description);
   }
 }
 const minDate = new Date();

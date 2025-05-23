@@ -10,6 +10,9 @@ import UpdateTeam from "../pages/UpdateTeam.vue";
 import TeamCreate from "../pages/TeamCreate.vue";
 import TeamJoin from "../pages/TeamJoin.vue";
 import UserRegister from "../pages/UserRegister.vue";
+import FriendList from "../pages/FriendList.vue";
+import Message from "../pages/Message.vue";
+import Chat from "../pages/Chat.vue";
 
 const routes = [
     {
@@ -123,6 +126,33 @@ const routes = [
             navTitle: '更新队伍',
             showBack: true,
             showSearch: false
+        }
+    },
+    {
+        path: '/friend/list',
+        component: FriendList,
+        meta: {
+            layout: 'basic',
+            navTitle: '我的好友',
+            showBack: true
+        }
+    },
+    {
+        path: '/message',
+        component: Message,
+        meta: {
+            layout: 'basic',
+            navTitle: '消息',
+            showBack: false
+        }
+    },
+    {
+        path: '/chat',
+        component: Chat,
+        meta: {
+            layout: 'basic',
+            navTitle: (route) => route.query.name || '聊天', // 动态标题
+            showBack: true
         }
     }
 ];
