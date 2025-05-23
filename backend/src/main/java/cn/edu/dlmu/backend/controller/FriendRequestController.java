@@ -1,7 +1,9 @@
 package cn.edu.dlmu.backend.controller;
 
 import cn.edu.dlmu.backend.common.BaseResponse;
+import cn.edu.dlmu.backend.model.domain.User;
 import cn.edu.dlmu.backend.model.request.FriendRequestSendRequest;
+import cn.edu.dlmu.backend.model.vo.FriendRequestVO;
 import cn.edu.dlmu.backend.utils.ResultUtils;
 import cn.edu.dlmu.backend.model.domain.FriendRequest;
 import cn.edu.dlmu.backend.model.request.FriendRequestOperateRequest;
@@ -31,9 +33,9 @@ public class FriendRequestController {
     }
 
     @GetMapping("/pending")
-    public BaseResponse<List<FriendRequest>> getPendingRequests(HttpServletRequest request) {
+    public BaseResponse<List<FriendRequestVO>> getPendingRequests(HttpServletRequest request) {
         Long userId = userService.getCurrentUserInfo(request).getId();
-        List<FriendRequest> requests = friendRequestService.getPendingRequests(userId);
+        List<FriendRequestVO> requests = friendRequestService.getPendingRequests(userId);
         return ResultUtils.success(requests);
     }
 
@@ -41,7 +43,8 @@ public class FriendRequestController {
     public BaseResponse<Boolean> handleFriendRequest(
             @RequestBody FriendRequestOperateRequest friendRequestOperateRequest,
             HttpServletRequest request) {
-        boolean result = friendRequestService.handleFriendRequest(friendRequestOperateRequest);
+        User currentUser = userService.getCurrentUserInfo(request);
+        boolean result = friendRequestService.handleFriendRequest(friendRequestOperateRequest, currentUser.getId());
         return ResultUtils.success(result);
     }
 }

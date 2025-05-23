@@ -7,6 +7,7 @@ import cn.edu.dlmu.backend.mapper.FriendRelationMapper;
 import cn.edu.dlmu.backend.model.domain.FriendRequest;
 import cn.edu.dlmu.backend.model.domain.FriendRelation;
 import cn.edu.dlmu.backend.model.request.FriendRequestOperateRequest;
+import cn.edu.dlmu.backend.model.vo.FriendRequestVO;
 import cn.edu.dlmu.backend.service.FriendRequestService;
 import cn.edu.dlmu.backend.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -26,6 +27,9 @@ public class FriendRequestServiceImpl extends ServiceImpl<FriendRequestMapper, F
 
     @Resource
     private FriendRelationMapper friendRelationMapper;
+
+    @Resource
+    private FriendRequestMapper friendRequestMapper;
 
     @Override
     @Transactional
@@ -57,22 +61,22 @@ public class FriendRequestServiceImpl extends ServiceImpl<FriendRequestMapper, F
     }
 
     @Override
-    public List<FriendRequest> getPendingRequests(Long userId) {
-        QueryWrapper<FriendRequest> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("receiverId", userId)
-                .eq("status", 0)
-                .orderByDesc("createTime");
-        return list(queryWrapper);
+    public List<FriendRequestVO> getPendingRequests(Long userId) {
+        return friendRequestMapper.selectPendingRequestsWithUserInfo(userId);
     }
 
     @Override
     @Transactional
-    public boolean handleFriendRequest(FriendRequestOperateRequest request) {
-        Long requestId = request.getRequestId();
-        Integer status = request.getStatus(); // 1-同意，2-拒绝
+    public boolean handleFriendRequest(FriendRequestOperateRequest friendRequestOperateRequest, Long receivedId) {
+        Long requestId = friendRequestOperateRequest.getRequestId();
+        Integer status = friendRequestOperateRequest.getStatus(); // 1-同意，2-拒绝
         FriendRequest friendRequest = getById(requestId);
         if (friendRequest == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR, "请求不存在");
+        }
+        // 校验当前用户是否是接收者
+        if (!friendRequest.getReceiverId().equals(receivedId)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "无权限处理该请求");
         }
         if (friendRequest.getStatus() != 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求已处理");

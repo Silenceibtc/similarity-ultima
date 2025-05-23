@@ -2,6 +2,7 @@ package cn.edu.dlmu.backend.service;
 
 import cn.edu.dlmu.backend.model.domain.FriendRequest;
 import cn.edu.dlmu.backend.model.request.FriendRequestOperateRequest;
+import cn.edu.dlmu.backend.model.vo.FriendRequestVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
@@ -21,12 +22,14 @@ public interface FriendRequestService extends IService<FriendRequest> {
      * @param userId 当前用户ID
      * @return 好友请求列表
      */
-    List<FriendRequest> getPendingRequests(Long userId);
+    List<FriendRequestVO> getPendingRequests(Long userId);
 
     /**
      * 处理好友请求（同意/拒绝）
-     * @param request 操作请求（包含请求ID、操作类型）
+     *
+     * @param friendRequestOperateRequest 操作请求（包含请求ID、操作类型）
+     * @param receivedId 接收者ID
      * @return 是否成功
      */
-    boolean handleFriendRequest(FriendRequestOperateRequest request);
+    boolean handleFriendRequest(FriendRequestOperateRequest friendRequestOperateRequest, Long receivedId);
 }

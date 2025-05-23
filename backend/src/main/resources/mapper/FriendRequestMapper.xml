@@ -20,4 +20,15 @@
         status,remark,createTime,
         updateTime,isDelete
     </sql>
+
+    <!-- src/main/resources/mapper/FriendRequestMapper.xml -->
+    <select id="selectPendingRequestsWithUserInfo" resultType="cn.edu.dlmu.backend.model.vo.FriendRequestVO">
+        SELECT fr.id, fr.remark, u.username as senderUsername, u.avatarUrl as senderAvatarUrl
+        FROM friend_request fr
+                 LEFT JOIN user u ON fr.senderId = u.id
+        WHERE fr.receiverId = #{receiverId}
+          AND fr.status = 0
+          AND fr.isDelete = 0
+        ORDER BY fr.createTime DESC
+    </select>
 </mapper>

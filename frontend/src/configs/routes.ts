@@ -13,6 +13,7 @@ import UserRegister from "../pages/UserRegister.vue";
 import FriendList from "../pages/FriendList.vue";
 import Message from "../pages/Message.vue";
 import Chat from "../pages/Chat.vue";
+import FriendRequestList from "../pages/FriendRequestList.vue";
 
 const routes = [
     {
@@ -152,6 +153,15 @@ const routes = [
         meta: {
             layout: 'basic',
             navTitle: (route) => route.query.name || '聊天', // 动态标题
+            showBack: true
+        }
+    },
+    {
+        path: '/friend/request/list',
+        component: FriendRequestList,
+        meta: {
+            layout: 'basic',
+            navTitle: '好友请求',
             showBack: true
         }
     }
