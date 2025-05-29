@@ -54,7 +54,7 @@ watchEffect(() => {
 <template>
   <div class="container">
     <div class="content">
-      <van-cell center title="心动模式">
+      <van-cell center title="智能匹配">
         <template #right-icon>
           <van-switch v-model="isMatchMode" />
         </template>

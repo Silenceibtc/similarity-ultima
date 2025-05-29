@@ -50,11 +50,6 @@ const goChat = (session: ChatSessionVO) => {
         <template #icon>
           <van-image :src="session.avatarUrl" round width="40px" height="40px" />
         </template>
-        <template #right-icon>
-          <div style="font-size: 12px; color: #999;">
-            {{ session.lastMessageTime | formatTime }}
-          </div>
-        </template>
       </van-cell>
     </van-list>
   </div>
