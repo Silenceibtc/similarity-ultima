@@ -1,7 +1,7 @@
 
 <script setup lang="ts">
 import {ref} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
+import {useRouter} from 'vue-router';
 import {showFailToast, showLoadingToast, showSuccessToast} from 'vant';
 import myAxios from "../plugins/myAxios.ts";
 import {BaseResponse} from "../models/response";
