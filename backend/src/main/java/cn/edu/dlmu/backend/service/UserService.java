@@ -1,6 +1,8 @@
 package cn.edu.dlmu.backend.service;
 
 import cn.edu.dlmu.backend.model.domain.User;
+import cn.edu.dlmu.backend.model.request.PageRequest;
+import cn.edu.dlmu.backend.model.vo.PageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -116,4 +118,11 @@ public interface UserService extends IService<User> {
      * @return 图像url
      */
     String uploadAvatar(MultipartFile file, User currentUser);
+
+    /**
+     * 分页查询用户
+     * @param pageRequest 分页参数
+     * @return 总记录数以及用户列表
+     */
+    PageVO<List<User>> getUserList(PageRequest pageRequest);
 }

@@ -6,6 +6,8 @@ import cn.edu.dlmu.backend.constant.UserConstant;
 import cn.edu.dlmu.backend.exception.BusinessException;
 import cn.edu.dlmu.backend.mapper.UserMapper;
 import cn.edu.dlmu.backend.model.domain.User;
+import cn.edu.dlmu.backend.model.request.PageRequest;
+import cn.edu.dlmu.backend.model.vo.PageVO;
 import cn.edu.dlmu.backend.service.UserService;
 import cn.edu.dlmu.backend.utils.AlgorithmUtils;
 import cn.edu.dlmu.backend.utils.QiniuCloudUtil;
@@ -72,7 +74,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (matcher.find()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号名称包含特殊字符");
         }
-        //账户不小于四位
+        //账户不大于12位
         if (userAccount.length() > 12) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号名称过长");
         }
@@ -356,6 +358,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public PageVO<List<User>> getUserList(PageRequest pageRequest) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        Page<User> page = this.page(new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize()), queryWrapper);
+        List<User> userList = page.getRecords().stream().map(this::getSafeUser).collect(Collectors.toList());
+        PageVO<List<User>> pageVO = new PageVO<>();
+        pageVO.setTotal(page.getTotal());
+        pageVO.setRecords(userList);
+        return pageVO;
     }
 
 }

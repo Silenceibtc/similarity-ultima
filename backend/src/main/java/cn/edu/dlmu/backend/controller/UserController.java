@@ -2,6 +2,8 @@ package cn.edu.dlmu.backend.controller;
 
 import cn.edu.dlmu.backend.common.BaseResponse;
 import cn.edu.dlmu.backend.common.ErrorCode;
+import cn.edu.dlmu.backend.model.request.PageRequest;
+import cn.edu.dlmu.backend.model.vo.PageVO;
 import cn.edu.dlmu.backend.utils.ResultUtils;
 import cn.edu.dlmu.backend.constant.RedisKey;
 import cn.edu.dlmu.backend.exception.BusinessException;
@@ -10,6 +12,7 @@ import cn.edu.dlmu.backend.model.request.UserLoginRequest;
 import cn.edu.dlmu.backend.model.request.UserRegisterRequest;
 import cn.edu.dlmu.backend.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -88,7 +91,7 @@ public class UserController {
     @GetMapping("/search")
     public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request) {
         //鉴权
-        if (userService.isAdmin(request)) {
+        if (!userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         //查询用户信息
@@ -100,6 +103,17 @@ public class UserController {
         //用户信息脱敏
         List<User> safeUserList = userList.stream().map(user -> userService.getSafeUser(user)).collect(Collectors.toList());
         return ResultUtils.success(safeUserList);
+    }
+
+    @GetMapping("/list")
+    public BaseResponse<PageVO<List<User>>> getUserList(HttpServletRequest request, PageRequest pageRequest) {
+        //鉴权
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        //查询用户信息
+        PageVO<List<User>> userList = userService.getUserList(pageRequest);
+        return ResultUtils.success(userList);
     }
 
     @GetMapping("/search/tags")
@@ -127,12 +141,12 @@ public class UserController {
         return ResultUtils.success(userList);
     }
 
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteUser(Long id, HttpServletRequest request) {
-        if (userService.isAdmin(request)) {
+    @PostMapping("/delete/{id}")
+    public BaseResponse<Boolean> deleteUser(@PathVariable Long id, HttpServletRequest request) {
+        if (!userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
-        if (id <= 0) {
+        if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean result = userService.removeById(id);

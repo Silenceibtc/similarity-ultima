@@ -6,6 +6,7 @@ import cn.edu.dlmu.backend.model.dto.TeamDTO;
 import cn.edu.dlmu.backend.model.request.JoinTeamRequest;
 import cn.edu.dlmu.backend.model.request.QuitTeamRequest;
 import cn.edu.dlmu.backend.model.request.UpdateTeamRequest;
+import cn.edu.dlmu.backend.model.vo.PageVO;
 import cn.edu.dlmu.backend.model.vo.TeamWithUserListVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -25,11 +26,11 @@ public interface TeamService extends IService<Team> {
     /**
      * 获取队伍列表
      *
-     * @param team        查询条件
+     * @param team    查询条件
      * @param isAdmin 是否为管理员
      * @return 关联用户信息的队伍列表
      */
-    List<TeamWithUserListVO> getTeamList(TeamDTO team, boolean isAdmin);
+    PageVO<List<TeamWithUserListVO>> getTeamList(TeamDTO team, boolean isAdmin);
 
     /**
      * 更新队伍信息
@@ -78,4 +79,11 @@ public interface TeamService extends IService<Team> {
      * @return 队伍列表及其关联用户
      */
     List<TeamWithUserListVO> getJoinedTeamList(Long userId);
+
+    /**
+     * 获取队伍列表分页
+     * @param teamDTO 分页参数
+     * @return 总记录数和队伍列表
+     */
+    PageVO<List<Team>> getTeamListPage(TeamDTO teamDTO);
 }

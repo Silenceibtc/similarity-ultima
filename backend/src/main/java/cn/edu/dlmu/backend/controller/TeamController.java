@@ -2,17 +2,16 @@ package cn.edu.dlmu.backend.controller;
 
 import cn.edu.dlmu.backend.common.BaseResponse;
 import cn.edu.dlmu.backend.common.ErrorCode;
-import cn.edu.dlmu.backend.utils.ResultUtils;
 import cn.edu.dlmu.backend.exception.BusinessException;
 import cn.edu.dlmu.backend.model.domain.Team;
 import cn.edu.dlmu.backend.model.domain.User;
 import cn.edu.dlmu.backend.model.dto.TeamDTO;
 import cn.edu.dlmu.backend.model.request.*;
+import cn.edu.dlmu.backend.model.vo.PageVO;
 import cn.edu.dlmu.backend.model.vo.TeamWithUserListVO;
 import cn.edu.dlmu.backend.service.TeamService;
 import cn.edu.dlmu.backend.service.UserService;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import cn.edu.dlmu.backend.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -94,10 +93,10 @@ public class TeamController {
     }
 
     @GetMapping("/list")
-    public BaseResponse<List<TeamWithUserListVO>> getTeamList(TeamDTO teamDTO, HttpServletRequest request) {
+    public BaseResponse<PageVO<List<TeamWithUserListVO>>> getTeamList(TeamDTO teamDTO, HttpServletRequest request) {
         boolean isAdmin = userService.isAdmin(request);
-        List<TeamWithUserListVO> teamList = teamService.getTeamList(teamDTO, isAdmin);
-        return ResultUtils.success(teamList);
+        PageVO<List<TeamWithUserListVO>> pageVO = teamService.getTeamList(teamDTO, isAdmin);
+        return ResultUtils.success(pageVO);
     }
 
     @GetMapping("/list/myTeam")
@@ -112,19 +111,6 @@ public class TeamController {
         User currentUser = userService.getCurrentUserInfo(request);
         List<TeamWithUserListVO> teamList = teamService.getJoinedTeamList(currentUser.getId());
         return ResultUtils.success(teamList);
-    }
-
-    @GetMapping("/list/page")
-    public BaseResponse<Page<Team>> getTeamListPage(@RequestBody TeamDTO teamDTO) {
-        if (teamDTO == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        Team team = new Team();
-        BeanUtils.copyProperties(teamDTO, team);
-        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
-        Page<Team> pageResult = teamService
-                .page(new Page<>(teamDTO.getPageNum(), teamDTO.getPageSize()), queryWrapper);
-        return ResultUtils.success(pageResult);
     }
 
     @PostMapping("/join")

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useRouter} from "vue-router";
 import TeamCardList from "../components/TeamCardList.vue";
-import {computed, onMounted, ref} from "vue";
+import {onMounted, ref} from "vue";
 import myAxios from "../plugins/myAxios.ts";
 import {showFailToast, showSuccessToast} from "vant";
 import {BaseResponse} from "../models/response";
@@ -13,12 +13,14 @@ const activeName = ref("public");
 const listTeams = async (val= '', teamStatus= 0) => {
   const res: BaseResponse = await myAxios.get('/team/list', {
     params: {
+      pageNum: 1,
+      pageSize: 10,
       searchText: val,
       teamStatus
     }
   });
   if (res.code === 0) {
-    teamList.value = res.data;
+    teamList.value = res.data.records;
     showSuccessToast('获取队伍列表成功');
   } else {
     showFailToast('获取队伍列表失败，请刷新重试');

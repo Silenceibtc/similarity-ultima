@@ -11,6 +11,7 @@ import cn.edu.dlmu.backend.model.enums.TeamStatusEnum;
 import cn.edu.dlmu.backend.model.request.JoinTeamRequest;
 import cn.edu.dlmu.backend.model.request.QuitTeamRequest;
 import cn.edu.dlmu.backend.model.request.UpdateTeamRequest;
+import cn.edu.dlmu.backend.model.vo.PageVO;
 import cn.edu.dlmu.backend.model.vo.TeamWithUserListVO;
 import cn.edu.dlmu.backend.model.vo.UserWithTeamIdVO;
 import cn.edu.dlmu.backend.service.GroupChatService;
@@ -18,6 +19,7 @@ import cn.edu.dlmu.backend.service.GroupMemberService;
 import cn.edu.dlmu.backend.service.TeamService;
 import cn.edu.dlmu.backend.service.UserTeamService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -134,7 +136,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamWithUserListVO> getTeamList(TeamDTO teamDTO, boolean isAdmin) {
+    public PageVO<List<TeamWithUserListVO>> getTeamList(TeamDTO teamDTO, boolean isAdmin) {
         // 1. 组合查询条件
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         if (teamDTO != null) {
@@ -194,12 +196,16 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         // 过期时间大于当前时间
         queryWrapper.and(qw -> qw.isNull("expireTime").or().gt("expireTime", new Date()));
         // 2. 查询队伍列表
-        List<Team> teamList = this.list(queryWrapper);
+        PageVO<List<TeamWithUserListVO>> pageVO = new PageVO<>();
+        Page<Team> page = this.page(new Page<>(teamDTO.getPageNum(), teamDTO.getPageSize()), queryWrapper);
+        List<Team> teamList = page.getRecords();
         if (CollectionUtils.isEmpty(teamList)) {
-            return new ArrayList<>();
+            return pageVO;
         }
-        // 3. 关联查询已加入队伍的用户信息
-        return getTeamWithUserListVOS(teamList);
+        pageVO.setTotal(page.getTotal());
+        List<TeamWithUserListVO> teamWithUserListVOS = getTeamWithUserListVOS(teamList);
+        pageVO.setRecords(teamWithUserListVOS);
+        return pageVO;
     }
 
     private List<TeamWithUserListVO> getTeamWithUserListVOS(List<Team> teamList) {
@@ -519,6 +525,18 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         List<Team> teamList = this.listByIds(teamIds);
         // 关联查询已加入队伍的用户信息
         return getTeamWithUserListVOS(teamList);
+    }
+
+    @Override
+    public PageVO<List<Team>> getTeamListPage(TeamDTO teamDTO) {
+        Team team = new Team();
+        BeanUtils.copyProperties(teamDTO, team);
+        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
+        Page<Team> pageResult = this.page(new Page<>(teamDTO.getPageNum(), teamDTO.getPageSize()), queryWrapper);
+        PageVO<List<Team>> pageVO = new PageVO<>();
+        pageVO.setTotal(pageResult.getTotal());
+        pageVO.setRecords(pageResult.getRecords());
+        return pageVO;
     }
 }
 
